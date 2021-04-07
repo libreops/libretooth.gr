@@ -1,0 +1,12 @@
+---
+- hosts: production
+  become: true
+
+  vars_files:
+    - private.yml
+
+  vars:
+    release: focal
+
+  roles:
+    - common

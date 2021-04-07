@@ -1,0 +1,10 @@
+image: alpine
+
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+    - apk add ansible-lint
+    - ansible-lint main.yml
