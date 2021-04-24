@@ -1,0 +1,101 @@
+- name: Checkout mastodon
+  git:
+    repo: 'https://github.com/tootsuite/mastodon.git'
+    dest: /home/mastodon/live
+    # https://github.com/tootsuite/mastodon/issues/15986#issuecomment-811556526
+    # version: "{{ mastodon_version }}"
+  become: yes
+  become_user: mastodon
+
+- name: Copy bundler configuration
+  copy:
+    src: files/bundler.config
+    dest: /home/mastodon/live/.bundle/config
+    owner: mastodon
+    group: mastodon
+
+- name: Install ruby dependencies
+  bundler:
+    state: present
+    chdir: /home/mastodon/live
+    executable: /home/mastodon/.rbenv/versions/{{ ruby_version }}/bin/bundle
+  become: yes
+  become_user: mastodon
+
+- name: Install js dependencies
+  yarn:
+    state: present
+    path: /home/mastodon/live
+    production: yes
+  become: yes
+  become_user: mastodon
+
+- name: Copy mastodon configuration
+  template:
+    src: env.production.j2
+    dest: /home/mastodon/live/.env.production
+    owner: mastodon
+    group: mastodon
+    mode: "644"
+
+- name: Precompile assets
+  shell:
+    cmd: RAILS_ENV=production /home/mastodon/.rbenv/versions/{{ ruby_version }}/bin/bundle exec rails assets:precompile
+    chdir: /home/mastodon/live
+    executable: /bin/bash
+  become: yes
+  become_user: mastodon
+
+- name: Check if database exists
+  postgresql_ping:
+    db: "mastodon_production"
+    login_user: mastodon
+  become: yes
+  become_user: mastodon
+  register: db_exists
+
+- name: Populate database
+  shell:
+    cmd: RAILS_ENV=production SAFETY_ASSURED=1 /home/mastodon/.rbenv/versions/{{ ruby_version }}/bin/bundle exec rails db:setup
+    chdir: /home/mastodon/live
+    executable: /bin/bash
+  become: yes
+  become_user: mastodon
+  when: not db_exists
+
+- name: Copy clean script
+  copy:
+    src: clean.sh
+    dest: /home/mastodon/clean.sh
+    owner: mastodon
+    group: mastodon
+    mode: "755"
+
+- name: Copy systemd files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "644"
+  with_items:
+    - {
+      src: "mastodon-clean.service.j2",
+      dest: "/etc/systemd/system/mastodon-clean.service"
+    }
+    - {
+      src: "mastodon-clean.timer.j2",
+      dest: "/etc/systemd/system/mastodon-clean.timer"
+    }
+    - {
+      src: "mastodon-sidekiq.service.j2",
+      dest: "/etc/systemd/system/mastodon-sidekiq.service"
+    }
+    - {
+      src: "mastodon-streaming.service.j2",
+      dest: "/etc/systemd/system/mastodon-streaming.service"
+    }
+    - {
+      src: "mastodon-web.service.j2",
+      dest: "/etc/systemd/system/mastodon-web.service"
+    }

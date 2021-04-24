@@ -1,0 +1,42 @@
+---
+# - import_tasks: packages.yml
+
+- name: Add mastodon user
+  user:
+    name: mastodon
+    comment: "Mastodon"
+    shell: /bin/bash
+    home: /home/mastodon
+    move_home: yes
+    password_lock: yes
+
+# - import_tasks: ruby.yml
+
+# - import_tasks: data.yml
+
+- import_tasks: config.yml
+
+- import_tasks: nginx.yml
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Start mastodon services
+  systemd:
+    name: "{{ item.name }}"
+    enabled: no
+    state: started
+  with_items:
+    - {
+      name: "mastodon-sidekiq.service"
+    }
+    - {
+      name: "mastodon-streaming.service"
+    }
+    - {
+      name: "mastodon-web.service"
+    }
+    - {
+      name: "mastodon-clean.timer"
+    }

@@ -1,0 +1,10 @@
+[Unit]
+Description=Mastodon Clean
+OnFailure=status-email-root@mastodon-clean.service
+
+[Service]
+Type=oneshot
+ExecStart=/home/mastodon/clean.sh
+PrivateTmp=true
+User=mastodon
+Group=mastodon

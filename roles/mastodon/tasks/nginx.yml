@@ -1,0 +1,54 @@
+---
+- name: Enable http ports on firewall
+  ufw:
+    rule: allow
+    name: "Nginx Full"
+
+- name: Check if certificate already exists.
+  stat:
+    path: /etc/letsencrypt/live/{{ inventory_hostname }}/cert.pem
+  register: letsencrypt_exists
+
+- name: Stop nginx to run certbot standalone
+  systemd:
+    name: nginx
+    enabled: no
+    state: stopped
+  when: not letsencrypt_exists.stat.exists
+
+- name: Create certificate for apex domain
+  command: |
+    certbot certonly --standalone --noninteractive --agree-tos \
+      --email {{ noreply_email }} -d {{ inventory_hostname }}
+  when: (not letsencrypt_exists.stat.exists) and (not www_cname)
+
+- name: Create certificate for apex and www domain
+  command: |
+    certbot certonly --standalone --noninteractive --agree-tos \
+      --email {{ noreply_email }} -d {{ inventory_hostname }} -d www.{{ inventory_hostname }}
+  when: (not letsencrypt_exists.stat.exists) and (www_cname)
+
+- name: Copy nginx configuration
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "644"
+  with_items:
+    - {
+      src: "mastodon.j2",
+      dest: "/etc/nginx/sites-available/mastodon"
+    }
+
+- name: Enable nginx configuration
+  file:
+    src: /etc/nginx/sites-available/mastodon
+    dest: /etc/nginx/sites-enabled/mastodon
+    state: link
+
+- name: Restart nginx service
+  systemd:
+    name: nginx
+    enabled: no
+    state: restarted

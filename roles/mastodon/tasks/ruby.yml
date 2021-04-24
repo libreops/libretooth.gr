@@ -1,0 +1,59 @@
+---
+- name: Checkout rbenv
+  git:
+    repo: 'https://github.com/rbenv/rbenv.git'
+    dest: /home/mastodon/.rbenv
+    version: master
+  become: yes
+  become_user: mastodon
+
+- name: Build rbenv
+  command:
+    cmd: src/configure && make -C src
+    chdir: /home/mastodon/.rbenv
+  become: yes
+  become_user: mastodon
+
+- name: Add rbenv in PATH
+  lineinfile:
+    name: /home/mastodon/.bashrc
+    line: 'export PATH="$HOME/.rbenv/bin:$PATH"'
+    state: present
+
+- name: Add rbenv eval in bashrc
+  lineinfile:
+    name: /home/mastodon/.bashrc
+    line: 'eval "$(rbenv init -)"'
+    state: present
+
+- name: Checkout ruby-build
+  git:
+    repo: 'https://github.com/rbenv/ruby-build.git'
+    dest: /home/mastodon/.rbenv/plugins/ruby-build
+  become: yes
+  become_user: mastodon
+
+- name: Install ruby version
+  shell:
+    cmd: RUBY_CONFIGURE_OPTS=--with-jemalloc /home/mastodon/.rbenv/bin/rbenv install -f {{ ruby_version }}
+    chdir: /home/mastodon/.rbenv
+    executable: /bin/bash
+    creates: "/home/mastodon/.rbenv/versions/{{ ruby_version }}/bin/ruby"
+  become: yes
+  become_user: mastodon
+
+- name: Set ruby version
+  shell:
+    cmd: /home/mastodon/.rbenv/bin/rbenv global {{ ruby_version }}
+    chdir: /home/mastodon/.rbenv
+    executable: /bin/bash
+  become: yes
+  become_user: mastodon
+
+- name: Install bundler
+  shell:
+    cmd: /home/mastodon/.rbenv/shims/gem install bundler --no-document
+    chdir: /home/mastodon/.rbenv
+    executable: /bin/bash
+  become: yes
+  become_user: mastodon

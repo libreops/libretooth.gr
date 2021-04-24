@@ -7,9 +7,11 @@
 
   vars:
     release: focal
+    www_cname: false
 
   roles:
     - common
     - postgres
     - redis
     - nginx
+    - mastodon

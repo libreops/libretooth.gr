@@ -13,3 +13,4 @@
     - postgres
     - redis
     - nginx
+    - mastodon

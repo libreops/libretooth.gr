@@ -1,0 +1,22 @@
+---
+- name: Check if mastodon data folder exists
+  stat:
+    path: "{{ data_folder }}mastodon"
+  register: data_exists
+
+- name: Create mastodon data folder
+  file:
+    path: "{{ data_folder }}mastodon"
+    state: directory
+    owner: mastodon
+    group: mastodon
+  when: not data_exists.stat.exists
+
+- name: Create mastodon symbolic link
+  file:
+    src: "{{ data_folder }}mastodon"
+    dest: /home/mastodon/live
+    state: link
+    owner: mastodon
+    group: mastodon
+  when: not data_exists.stat.exists

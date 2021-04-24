@@ -1,0 +1,10 @@
+[Unit]
+Description=Run mastodon clean script daily
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=43m
+Persistent=true
+
+[Install]
+WantedBy=timers.target
