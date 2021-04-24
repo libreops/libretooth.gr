@@ -1,0 +1,57 @@
+---
+- name: Install redis packages
+  apt:
+    pkg:
+    - redis-server
+    - redis-tools
+    state: present
+
+- name: Stop and disable redis
+  systemd:
+    name: redis-server
+    enabled: no
+    state: stopped
+
+- name: Check if redis data folder exists
+  stat:
+    path: "{{ data_folder }}redis"
+  register: data_exists
+
+- name: Create redis data folder
+  file:
+    path: "{{ data_folder }}redis"
+    state: directory
+    owner: redis
+    group: redis
+  when: not data_exists.stat.exists
+
+- name: Copy redis data folder
+  copy:
+    src: /var/lib/redis/
+    dest: "{{ data_folder }}redis/"
+    remote_src: True
+    owner: redis
+    group: redis
+    follow: yes
+  when: not data_exists.stat.exists
+
+- name: Remove old redis data folder
+  file:
+    path: /var/lib/redis
+    state: absent
+  when: not data_exists.stat.exists
+
+- name: Create redis symbolic link
+  file:
+    src: "{{ data_folder }}redis"
+    dest: /var/lib/redis
+    state: link
+    owner: redis
+    group: redis
+  when: not data_exists.stat.exists
+
+- name: Start redis
+  systemd:
+    name: redis-server
+    enabled: no
+    state: started
