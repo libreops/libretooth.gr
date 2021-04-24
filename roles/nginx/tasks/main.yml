@@ -1,0 +1,53 @@
+---
+- name: Install nginx packages
+  apt:
+    pkg:
+      - nginx
+      - certbot
+    state: present
+
+- name: Stop and disable nginx service
+  systemd:
+    name: nginx
+    enabled: no
+    state: stopped
+
+- name: Remove default host file
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- import_tasks: letsencrypt.yml
+
+- name: Copy configuration files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - {
+      src: "nginx.conf.j2",
+      dest: "/etc/nginx/nginx.conf"
+    }
+    - {
+      src: "ssl.conf.j2",
+      dest: "/etc/nginx/conf.d/ssl.conf"
+    }
+
+- name: Retrieve nginx badbot blocker
+  git:
+    repo: https://github.com/mariusv/nginx-badbot-blocker.git
+    dest: /etc/nginx/nginx-badbot-blocker/
+    update: yes
+
+- name: Create dhparam.pem if not exists
+  command: >
+    openssl dhparam -out /etc/ssl/dhparam.pem 2048 creates=/etc/ssl/dhparam.pem
+
+- name: Start nginx service
+  systemd:
+    name: nginx
+    enabled: no
+    state: started

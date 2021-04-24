@@ -1,0 +1,38 @@
+---
+- name: Check if letsencrypt data folder exists
+  stat:
+    path: "{{ data_folder }}letsencrypt"
+  register: data_exists
+
+- name: Create letsencrypt data folder
+  file:
+    path: "{{ data_folder }}letsencrypt"
+    state: directory
+    owner: root
+    group: root
+  when: not data_exists.stat.exists
+  
+- name: Copy redis data folder
+  copy:
+    src: /etc/letsencrypt/
+    dest: "{{ data_folder }}letsencrypt/"
+    remote_src: True
+    owner: root
+    group: root
+    follow: yes
+  when: not data_exists.stat.exists
+
+- name: Remove old letsencrypt data folder
+  file:
+    path: /etc/letsencrypt
+    state: absent
+  when: not data_exists.stat.exists
+
+- name: Create letsencrypt symbolic link
+  file:
+    src: "{{ data_folder }}letsencrypt"
+    dest: /etc/letsencrypt
+    state: link
+    owner: root
+    group: root
+  when: not data_exists.stat.exists
