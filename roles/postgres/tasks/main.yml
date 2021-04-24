@@ -1,0 +1,80 @@
+---
+- name: Install postgresql packages
+  apt:
+    pkg:
+    - postgresql
+    - postgresql-contrib
+    - python3-psycopg2
+    state: present
+
+- name: Create postgresql mastodon user
+  become_user: postgres
+  postgresql_user:
+    name: mastodon
+    role_attr_flags: CREATEDB,NOSUPERUSER
+
+- name: Stop and disable postgresql
+  systemd:
+    name: postgresql
+    enabled: no
+    state: stopped
+
+- name: Copy postgresql configuration
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: postgres
+    group: postgres
+    mode: 0644
+  with_items:
+    - {
+      src: "postgresql.conf.j2",
+      dest: "/etc/postgresql/{{ postgres_version }}/main/postgresql.conf"
+    }
+    - {
+      src: "pghero.conf.j2",
+      dest: "/etc/postgresql/{{ postgres_version }}/main/pghero.conf"
+    }
+
+- name: Check if postgresql data folder exists
+  stat:
+    path: "{{ data_folder }}postgresql"
+  register: data_exists
+
+- name: Create postgresql data folder
+  file:
+    path: "{{ data_folder }}postgresql"
+    state: directory
+    owner: postgresql
+    group: postgresql
+  when: not data_exists.stat.exists
+
+- name: Copy postgresql data folder
+  copy:
+    remote_src: True
+    src: /var/lib/postgresql/
+    dest: "{{ data_folder }}postgresql/"
+    owner: postgres
+    group: postgres
+  when: not data_exists.stat.exists
+
+- name: Remove old postgresql data folder
+  file:
+    path: /var/lib/postgresql
+    state: absent
+  when: not data_exists.stat.exists
+
+- name: Create postgresql symbolic link
+  file:
+    src: "{{ data_folder }}postgresql"
+    dest: /var/lib/postgresql
+    state: link
+    owner: postgres
+    group: postgres
+  when: not data_exists.stat.exists
+
+- name: Start postgresql
+  systemd:
+    name: postgresql
+    enabled: no
+    state: started
