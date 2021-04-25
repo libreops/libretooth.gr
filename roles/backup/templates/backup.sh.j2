@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -e
+
+# Backblaze B2
+B2_ACCOUNT="{{ backup_b2_account }}"
+B2_KEY="{{ backup_b2_key }}"
+B2_BUCKET="{{ backup_b2_bucket }}"
+
+# Things to backup
+MASTODON="{{ data_folder }}mastodon/"
+SQLFILE="{{ data_folder }}tmp/mastodon.psql"
+REDISFILE="{{ data_folder }}redis/dump.rdb"
+UPLOADSDIR="${MASTODON}public/system/"
+ENVFILE="${MASTODON}.env.production"
+MOA="{{ data_folder }}moa/"
+
+# Local vars
+REMOTE="{{ backup_data }}"
+DATE=$(date +"%Y.%m.%d-%H%M")
+OPTS="-s --progress --compression lzma"
+SUFFIX="-libretooth"
+export BORG_PASSPHRASE="{{ backup_borg_passphrase }}"
+
+echo "Dump Mastodon's postgres database..."
+sudo -u mastodon -H pg_dump -Fc mastodon_production > ${SQLFILE}
+echo
+
+echo "Borg local backup..."
+borg create ${OPTS} -e "${MASTODON}public/system/cache" ${REMOTE}::${DATE}${SUFFIX} ${SQLFILE} ${REDISFILE} ${UPLOADSDIR} ${ENVFILE} ${MOA}
+echo
+
+echo "Clean up..."
+rm ${SQLFILE}
+borg prune --keep-within 30d --stats ${REMOTE}
+echo
+
+echo "Push to Backblaze..."
+rclone sync --fast-list {{ backup_data }} remote:libreopscc-libretooth -P
+rclone cleanup remote:libreopscc-libretooth

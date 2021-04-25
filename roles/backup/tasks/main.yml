@@ -1,0 +1,58 @@
+---
+- name: Install backup packages
+  apt:
+    pkg:
+    - python3-b2sdk
+    - borgbackup
+    - rclone
+
+- name: Make sure needed directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+    mode: "700"
+  with_items:
+    - "{{ root_bin }}"
+    - "{{ backup_data }}"
+    - "{{ backup_rclone_config }}"
+
+- name: Copy backup configuration and scripts
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  with_items:
+    - {
+      src: backup.sh.j2,
+      dest: "{{ root_bin }}backup.sh",
+      mode: "700"
+    }
+    - {
+      src: backup_mount.sh.j2,
+      dest: "{{ root_bin }}backup_mount.sh",
+      mode: "700"
+    }
+    - {
+      src: backup.timer.j2,
+      dest: /etc/systemd/system/backup.timer,
+      mode: "644"
+    }
+    - {
+      src: backup.service.j2,
+      dest: /etc/systemd/system/backup.service,
+      mode: "644"
+    }
+    - {
+      src: rclone.conf.j2,
+      dest: "{{ backup_rclone_config }}rclone.conf",
+      mode: "600"
+    }
+
+- name: Enable backup timer
+  systemd:
+    name: backup.timer
+    enabled: no
+    state: started

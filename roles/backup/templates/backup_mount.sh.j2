@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+
+# Local vars
+REMOTE="{{ backup_data }}"
+MOUNT="/mnt/backup/"
+export BORG_PASSPHRASE="{{ backup_borg_passphrase }}"
+
+# Make sure mount dirs exists
+[ ! -d "${MOUNT}" ] && mkdir -p "${MOUNT}"
+
+# Borg mount
+borg mount ${REMOTE} ${MOUNT}
+
+echo "Borg archive mounted at ${MOUNT}"

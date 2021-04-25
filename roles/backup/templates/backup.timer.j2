@@ -1,0 +1,10 @@
+[Unit]
+Description=Run backup script every two days
+
+[Timer]
+OnCalendar=Mon,Thu,Sat *-*-* 00:00:00
+RandomizedDelaySec=12m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

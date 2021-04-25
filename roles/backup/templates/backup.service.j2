@@ -1,0 +1,8 @@
+[Unit]
+Description=Backup
+OnFailure=status-email-root@backup.service
+
+[Service]
+Type=oneshot
+ExecStart="{{ root_bin }}backup.sh
+PrivateTmp=true
