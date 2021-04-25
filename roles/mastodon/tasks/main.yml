@@ -1,5 +1,5 @@
 ---
-# - import_tasks: packages.yml
+- import_tasks: packages.yml
 
 - name: Add mastodon user
   user:
@@ -10,9 +10,9 @@
     move_home: yes
     password_lock: yes
 
-# - import_tasks: ruby.yml
+- import_tasks: ruby.yml
 
-# - import_tasks: data.yml
+- import_tasks: data.yml
 
 - import_tasks: config.yml
 
