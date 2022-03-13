@@ -35,5 +35,5 @@ borg prune --keep-within 30d --stats ${REMOTE}
 echo
 
 echo "Push to Backblaze..."
-rclone sync --fast-list {{ backup_data }} remote:libreopscc-libretooth -P
-rclone cleanup remote:libreopscc-libretooth
+rclone --config {{ backup_rclone_config }}rclone.conf sync --fast-list {{ backup_data }} remote:libreopscc-libretooth -P
+rclone --config {{ backup_rclone_config }}rclone.conf cleanup remote:libreopscc-libretooth

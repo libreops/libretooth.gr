@@ -12,10 +12,12 @@
     state: directory
     recurse: yes
     mode: "700"
+    owner: root
+    group: root
   with_items:
-    - "{{ root_bin }}"
     - "{{ backup_data }}"
     - "{{ backup_rclone_config }}"
+    - "{{ data_folder }}bin"
 
 - name: Copy backup configuration and scripts
   template:
@@ -27,12 +29,12 @@
   with_items:
     - {
       src: backup.sh.j2,
-      dest: "{{ root_bin }}backup.sh",
+      dest: "{{ data_folder }}bin/backup.sh",
       mode: "700"
     }
     - {
       src: backup_mount.sh.j2,
-      dest: "{{ root_bin }}backup_mount.sh",
+      dest: "{{ data_folder }}bin/backup_mount.sh",
       mode: "700"
     }
     - {

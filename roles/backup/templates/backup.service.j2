@@ -4,5 +4,5 @@ OnFailure=status-email-root@backup.service
 
 [Service]
 Type=oneshot
-ExecStart="{{ root_bin }}backup.sh
+ExecStart={{ data_folder }}bin/backup.sh
 PrivateTmp=true
