@@ -109,5 +109,7 @@ server {
     tcp_nodelay on;
   }
 
+  include /etc/nginx/snippets/node_exporter[.]conf;
+
   error_page 500 501 502 503 504 /500.html;
 }

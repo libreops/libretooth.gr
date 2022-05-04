@@ -1,0 +1,60 @@
+---
+- name: Download node_exporter
+  get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v{{ ne_version }}/node_exporter-{{ ne_version }}.linux-amd64.tar.gz"
+    dest: /tmp/ne.tar.gz
+    mode: '0640'
+
+- name: Extract node_exporter
+  unarchive:
+    remote_src: yes
+    src: /tmp/ne.tar.gz
+    dest: /tmp/
+
+- name: Copy node_exporter binary
+  copy:
+    remote_src: true
+    src: /tmp/node_exporter-1.3.1.linux-amd64/node_exporter
+    dest: /usr/local/bin/node_exporter
+    owner: root
+    group: root
+    mode: "755"
+
+- name: Add prometheus user
+  user:
+    name: prometheus
+    shell: /bin/false
+    system: yes
+
+- name: Copy node_exporter systemd files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "644"
+  with_items:
+    - {
+      src: "node_exporter.service.j2",
+      dest: "/etc/systemd/system/node_exporter.service"
+    }
+
+- name: Start node_exporter services
+  systemd:
+    name: "{{ item.name }}"
+    enabled: no
+    state: started
+  with_items:
+    - {
+      name: "node_exporter.service"
+    }
+
+- name: Start node_exporter services
+  systemd:
+    name: "{{ item.name }}"
+    enabled: no
+    state: started
+  with_items:
+    - {
+      name: "node_exporter.service"
+    }
