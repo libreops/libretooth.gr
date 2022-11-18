@@ -1,0 +1,18 @@
+#!/bin/bash
+{{ init_cmd }}
+sleep 2
+
+# Start system services
+systemctl start redis-server.service
+systemctl start postgresql.service
+systemctl start nginx.service
+sleep 2
+
+# Start mastodon services
+systemctl start mastodon-web.service mastodon-sidekiq.service mastodon-streaming.service
+
+# Start moa services
+systemctl start moa-gunicorn.service
+
+# Start timers
+systemctl start certbot.timer moa-worker.timer mastodon-clean.timer backup.timer
