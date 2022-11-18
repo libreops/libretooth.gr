@@ -1,0 +1,11 @@
+[Unit]
+Description=Worker for moa
+OnFailure=status-email-root@backup.service
+
+[Service]
+Type=oneshot
+User=moa
+Group=moa
+WorkingDirectory=/home/moa/live/
+Environment="MOA_CONFIG=ProductionConfig"
+ExecStart=/home/moa/venv/bin/python3 -m moa.worker

@@ -1,0 +1,17 @@
+[Unit]
+Description=gunicorn daemon for moa
+After=network.target
+
+[Service]
+PIDFile=/var/run/moa/moa.pid
+User=moa
+Group=moa
+WorkingDirectory=/home/moa/live/
+Environment="MOA_CONFIG=config.ProductionConfig"
+ExecStart=/home/moa/venv/bin/gunicorn --config /home/moa/gunicorn.conf --access-logfile /var/log/moa/access.log --error-logfile /var/log/moa/error.log passenger_wsgi
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
