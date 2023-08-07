@@ -2,8 +2,7 @@
   git:
     repo: 'https://github.com/tootsuite/mastodon.git'
     dest: /home/mastodon/live
-    # https://github.com/tootsuite/mastodon/issues/15986#issuecomment-811556526
-    # version: "{{ mastodon_version }}"
+    version: "{{ mastodon_version }}"
   become: yes
   become_user: mastodon
 
