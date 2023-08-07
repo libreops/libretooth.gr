@@ -6,7 +6,7 @@
     - private.yml
 
   vars:
-    release: focal
+    release: jammy
 
   roles:
     - common
