@@ -2,9 +2,9 @@
 set -e
 
 # Local vars
-REMOTE="{{ backup_data }}"
+REMOTE="storagebox:./backups/libretooth"
 MOUNT="/mnt/backup/"
-export BORG_PASSPHRASE="{{ backup_borg_passphrase }}"
+export BORG_PASSPHRASE="{{ borg.passphrase }}"
 
 # Make sure mount dirs exists
 [ ! -d "${MOUNT}" ] && mkdir -p "${MOUNT}"

@@ -2,9 +2,9 @@
 set -e
 
 # Backblaze B2
-B2_ACCOUNT="{{ backup_b2_account }}"
-B2_KEY="{{ backup_b2_key }}"
-B2_BUCKET="{{ backup_b2_bucket }}"
+B2_ACCOUNT="{{ b2.account }}"
+B2_KEY="{{ b2.key }}"
+B2_BUCKET="{{ b2.bucket }}"
 
 # Things to backup
 MASTODON="{{ data_folder }}mastodon/"
@@ -15,18 +15,21 @@ ENVFILE="${MASTODON}.env.production"
 MOA="{{ data_folder }}moa/"
 
 # Local vars
-REMOTE="{{ backup_data }}"
+REMOTE="storagebox:./backups/libretooth"
 DATE=$(date +"%Y.%m.%d-%H%M")
 OPTS="-s --progress --compression lzma"
 SUFFIX="-libretooth"
-export BORG_PASSPHRASE="{{ backup_borg_passphrase }}"
+export BORG_PASSPHRASE="{{ borg.passphrase }}"
 
 echo "Dump Mastodon's postgres database..."
 sudo -u mastodon -H pg_dump -Fc mastodon_production > ${SQLFILE}
 echo
 
-echo "Borg local backup..."
-borg create ${OPTS} -e "${MASTODON}public/system/cache" ${REMOTE}::${DATE}${SUFFIX} ${SQLFILE} ${REDISFILE} ${UPLOADSDIR} ${ENVFILE} ${MOA}
+echo "Borg Storage Box backup..."
+# if we ever want to exclude cache folder from backups
+# https://github.com/hometown-fork/hometown/issues/1217#issuecomment-1334033843
+# -e "${MASTODON}public/system/cache"
+borg create ${OPTS} ${REMOTE}::${DATE}${SUFFIX} ${SQLFILE} ${REDISFILE} ${UPLOADSDIR} ${ENVFILE} ${MOA}
 echo
 
 echo "Clean up..."
@@ -35,5 +38,5 @@ borg prune --keep-within 30d --stats ${REMOTE}
 echo
 
 echo "Push to Backblaze..."
-rclone --config {{ backup_rclone_config }}rclone.conf sync --fast-list {{ backup_data }} remote:libreopscc-libretooth -P
-rclone --config {{ backup_rclone_config }}rclone.conf cleanup remote:libreopscc-libretooth
+rclone sync --fast-list hetzner:./backups/libretooth backblaze:libreopscc-libretooth -P
+rclone cleanup backblaze:libreopscc-libretooth

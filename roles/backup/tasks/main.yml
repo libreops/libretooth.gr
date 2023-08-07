@@ -15,9 +15,11 @@
     owner: root
     group: root
   with_items:
-    - "{{ backup_data }}"
-    - "{{ backup_rclone_config }}"
+    - "{{ data_folder }}.ssh"
+    - "{{ data_folder }}.config/rclone/"
     - "{{ data_folder }}bin"
+    - "{{ data_folder }}tmp"
+    - "/root/.config/"
 
 - name: Copy backup configuration and scripts
   template:
@@ -49,9 +51,42 @@
     }
     - {
       src: rclone.conf.j2,
-      dest: "{{ backup_rclone_config }}rclone.conf",
+      dest: "{{ data_folder }}.config/rclone/rclone.conf",
       mode: "600"
     }
+    - {
+      src: ssh_config.j2,
+      dest: "{{ data_folder }}.ssh/config",
+      mode: "600"
+    }
+    - {
+      src: ssh_key.pub.j2,
+      dest: "{{ data_folder }}{{ storagebox.keyfile }}.pub",
+      mode: "600"
+    }
+    - {
+      src: ssh_key.j2,
+      dest: "{{ data_folder }}{{ storagebox.keyfile }}",
+      mode: "600"
+    }
+
+- name: Create symbolic links
+  file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+    owner: root
+    group: root
+  with_items:
+    - {
+      src: "{{ data_folder }}.ssh",
+      dest: /root/.ssh
+    }
+    - {
+      src: "{{ data_folder }}.config/rclone",
+      dest: /root/.config/rclone
+    }
+
 
 - name: Enable backup timer
   systemd:

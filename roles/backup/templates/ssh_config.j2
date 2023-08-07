@@ -1,0 +1,10 @@
+Host *
+  Compression yes
+  ServerAliveInterval 60
+  IdentitiesOnly yes
+
+Host storagebox
+User {{ storagebox.username }}
+Hostname {{ storagebox.server }}
+Port {{ storagebox.port }}
+IdentityFile {{ data_folder}}{{ storagebox.keyfile }}

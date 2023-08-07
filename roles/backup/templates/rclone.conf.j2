@@ -1,5 +1,14 @@
-[remote]
+[backblaze]
 type = b2
-account = {{ backup_b2_account }}
-key = {{ backup_b2_key }}
+account = {{ b2.account }}
+key = {{ b2.key }}
 hard_delete = true
+
+[hetzner]
+type = sftp
+host = {{ storagebox.server }}
+user = {{ storagebox.username }}
+port = {{ storagebox.port }}
+key_file = {{ data_folder}}{{ storagebox.keyfile }}
+md5sum_command = md5 -r
+sha1sum_command = sha1 -r
