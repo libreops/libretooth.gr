@@ -32,8 +32,8 @@
       dest: "/etc/postgresql/{{ postgres_version }}/main/postgresql.conf"
     }
     - {
-      src: "pghero.conf.j2",
-      dest: "/etc/postgresql/{{ postgres_version }}/main/pghero.conf"
+      src: "pgtune.conf.j2",
+      dest: "/etc/postgresql/{{ postgres_version }}/main/conf.d/pgtune.conf"
     }
 
 - name: Check if postgresql data folder exists

@@ -1,1 +1,2 @@
-postgres_version: "12"
+---
+postgres_version: "14"
