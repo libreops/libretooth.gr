@@ -6,4 +6,5 @@ export PATH="$HOME/.rbenv/bin:$PATH"
 eval "$(rbenv init -)"
 
 RAILS_ENV=production bin/tootctl media remove --days=2
+RAILS_ENV=production bin/tootctl media remove-orphans
 RAILS_ENV=production bin/tootctl preview_cards remove

@@ -2,3 +2,13 @@
 node_version: "14"
 ruby_version: "3.0.6"
 mastodon_version: "v4.1.6"
+
+node:
+  key_id: "9FD3B784BC1C6FC31A8A0A1C1655A0AB68576280"
+  key_url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+  repo_string: "deb https://deb.nodesource.com/node_{{ node_version }}.x {{ release }} main"
+
+yarn:
+  key_id: "72ECF46A56B4AD39C907BBB71646B01B86E50310"
+  key_url: "https://dl.yarnpkg.com/debian/pubkey.gpg"
+  repo_string: "deb https://dl.yarnpkg.com/debian/ stable main"

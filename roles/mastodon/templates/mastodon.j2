@@ -111,5 +111,7 @@ server {
 
   include /etc/nginx/snippets/node_exporter[.]conf;
 
+  include /etc/nginx/snippets/pghero[.]conf;
+
   error_page 500 501 502 503 504 /500.html;
 }

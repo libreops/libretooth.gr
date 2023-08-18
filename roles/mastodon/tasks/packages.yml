@@ -1,28 +1,28 @@
 ---
 - name: Add node repository gpg key
   apt_key:
-    data: "{{ lookup('file', 'node.asc') }}"
-    id: 9FD3B784BC1C6FC31A8A0A1C1655A0AB68576280
+    url: "{{ node.key_url }}"
+    id: "{{ node.key_id }}"
     state: present
 
 - name: Add node repository
   become: yes
   apt_repository:
-    repo: "deb https://deb.nodesource.com/node_{{ node_version }}.x {{ release }} main"
+    repo: "{{ node.repo_string }}"
     state: present
     filename: node
     update_cache: yes
 
 - name: Add yarn repository gpg key
   apt_key:
-    data: "{{ lookup('file', 'yarn.asc') }}"
-    id: 72ECF46A56B4AD39C907BBB71646B01B86E50310
+    url: "{{ yarn.key_url }}"
+    id: "{{ yarn.key_id }}"
     state: present
 
 - name: Add yarn repository
   become: yes
   apt_repository:
-    repo: 'deb https://dl.yarnpkg.com/debian/ stable main'
+    repo: "{{ yarn.repo_string }}"
     state: present
     filename: yarn
     update_cache: yes
