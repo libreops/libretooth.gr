@@ -4,12 +4,13 @@
     pkg:
     - prometheus-node-exporter
     - apache2-utils
+    - python3-passlib
 
 - name: Generate htpasswd file
   htpasswd:
-    path: "{{ node_exporter_path }}"
-    name: "{{ node_exporter_username }}"
-    password: "{{ node_exporter_password }}"
+    path: "{{ node_exporter.path }}"
+    name: "{{ node_exporter.username }}"
+    password: "{{ node_exporter.password }}"
     owner: root
     group: www-data
     mode: "640"
