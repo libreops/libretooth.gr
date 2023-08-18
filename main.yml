@@ -7,6 +7,7 @@
 
   vars:
     release: jammy
+    www_cname: true
 
   roles:
     - common
@@ -15,3 +16,4 @@
     - nginx
     - mastodon
     - monitoring
+    - backup

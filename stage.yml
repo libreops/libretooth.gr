@@ -6,7 +6,7 @@
     - private.yml
 
   vars:
-    release: focal
+    release: jammy
     www_cname: false
 
   roles:
@@ -15,3 +15,5 @@
     - redis
     - nginx
     - mastodon
+    - monitoring
+    - backup
