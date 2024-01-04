@@ -25,16 +25,17 @@ echo "Dump Mastodon's postgres database..."
 sudo -u mastodon -H pg_dump -Fc mastodon_production > ${SQLFILE}
 echo
 
+echo "Clean up..."
+borg prune --keep-within 20d --stats ${REMOTE}
+borg compact --progress ${REMOTE}
+echo
+
 echo "Borg Storage Box backup..."
 # if we ever want to exclude cache folder from backups
 # https://github.com/hometown-fork/hometown/issues/1217#issuecomment-1334033843
 # -e "${MASTODON}public/system/cache"
 borg create ${OPTS} ${REMOTE}::${DATE}${SUFFIX} ${SQLFILE} ${REDISFILE} ${UPLOADSDIR} ${ENVFILE} ${MOA}
-echo
-
-echo "Clean up..."
 rm ${SQLFILE}
-borg prune --keep-within 30d --stats ${REMOTE}
 echo
 
 echo "Push to Backblaze..."
